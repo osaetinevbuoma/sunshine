@@ -27,6 +27,10 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.GregorianCalendar;
+import java.util.Locale;
+import java.util.TimeZone;
 
 public class ForecastFragment extends Fragment {
 
@@ -251,6 +255,9 @@ public class ForecastFragment extends Fragment {
             Time dayTime = new Time();
             dayTime.setToNow();
 
+            // This should replace deprecated Time() eventually
+            // GregorianCalendar calendar = new GregorianCalendar(TimeZone.getDefault(), Locale.getDefault());
+
             // we start at the day returned by local time. Otherwise this is a mess.
             int julianStartDay = Time.getJulianDay(System.currentTimeMillis(), dayTime.gmtoff);
 
@@ -274,6 +281,11 @@ public class ForecastFragment extends Fragment {
                 // Cheating to convert this to UTC time, which is what we want anyhow
                 dateTime = dayTime.setJulianDay(julianStartDay + i);
                 day = getReadableDateString(dateTime);
+
+                // This should replace deprecated Time() eventually
+                /*long dateTime = calendar.getTimeInMillis();
+                day = getReadableDateString(dateTime);
+                calendar.add(Calendar.DATE, 1);*/
 
                 // description is in a child array called "weather", which is 1 element long.
                 JSONObject weatherObject = dayForecast.getJSONArray(OWM_WEATHER).getJSONObject(0);
