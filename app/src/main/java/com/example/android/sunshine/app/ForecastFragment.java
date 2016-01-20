@@ -1,8 +1,12 @@
 package com.example.android.sunshine.app;
 
+import android.content.Intent;
+import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.preference.Preference;
+import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
 import android.text.format.Time;
 import android.util.Log;
@@ -12,6 +16,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
@@ -27,10 +32,15 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.GregorianCalendar;
+import java.util.Locale;
+import java.util.TimeZone;
 
 public class ForecastFragment extends Fragment {
 
     ArrayAdapter<String> mForecastAdapter;
+    SharedPreferences mSharedPreferences;
 
     public ForecastFragment() {
     }
@@ -45,21 +55,23 @@ public class ForecastFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
 
-        View rootView = inflater.inflate(R.layout.fragment_main, container, false);
+        final View rootView = inflater.inflate(R.layout.fragment_main, container, false);
 
         ArrayList<String> forecast = new ArrayList<>();
-        forecast.add("Today - Sunny - 88/63");
-        forecast.add("Tomorrow - Foggy 70/46");
-        forecast.add("Weds - Cloudy - 72/63");
-        forecast.add("Thurs - Rainy - 64/51");
-        forecast.add("Fri - Foggy - 70/46");
-        forecast.add("Sat - Sunny - 76/68");
 
         mForecastAdapter = new ArrayAdapter<String>(getActivity(), R.layout.list_item_forecast,
                 R.id.list_item_forecast_textview, forecast);
 
-        ListView listView = (ListView) rootView.findViewById(R.id.listview_forecast);
+        final ListView listView = (ListView) rootView.findViewById(R.id.listview_forecast);
         listView.setAdapter(mForecastAdapter);
+        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                Intent intent = new Intent(getActivity(), DetailActivity.class);
+                intent.putExtra(Intent.EXTRA_TEXT, mForecastAdapter.getItem(position));
+                startActivity(intent);
+            }
+        });
 
         return rootView;
     }
@@ -74,12 +86,28 @@ public class ForecastFragment extends Fragment {
         int id = item.getItemId();
 
         if (id == R.id.action_refresh) {
-            FetchWeatherTask fetchWeatherTask = new FetchWeatherTask();
-            fetchWeatherTask.execute("Abuja");
+            updateWeather();
             return true;
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        updateWeather();
+    }
+
+    // Fetch and update weather info on view
+    public void updateWeather() {
+        // Read user's location from preference
+        mSharedPreferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
+        String location = mSharedPreferences.getString(getString(R.string.pref_location_key), getString(R.string.pref_location_default));
+
+        // Fetch weather report from OpenWeatherMap API
+        FetchWeatherTask fetchWeatherTask = new FetchWeatherTask();
+        fetchWeatherTask.execute(location);
     }
 
     public class FetchWeatherTask extends AsyncTask<String, Void, String[]> {
@@ -211,9 +239,21 @@ public class ForecastFragment extends Fragment {
          * Prepare the weather high/lows for presentation.
          */
         private String formatHighLows(double high, double low) {
+            // Check user's temperature units preference
+            SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
+            String tempPref = sharedPreferences.getString(getString(R.string.pref_temp_unit_key), getString(R.string.pref_temp_unit_default));
+
             // For presentation, assume the user doesn't care about tenths of a degree.
             long roundedHigh = Math.round(high);
             long roundedLow = Math.round(low);
+
+            if (tempPref.equals("Imperial")) {
+                long highCelsius = (long) ((high * 9) / 5) + 32;
+                long lowCelsius = (long) ((low * 9) / 5) + 32;
+
+                roundedHigh = Math.round(highCelsius);
+                roundedLow = Math.round(lowCelsius);
+            }
 
             String highLowStr = roundedHigh + "/" + roundedLow;
             return highLowStr;
@@ -251,6 +291,9 @@ public class ForecastFragment extends Fragment {
             Time dayTime = new Time();
             dayTime.setToNow();
 
+            // This should replace deprecated Time() eventually
+            // GregorianCalendar calendar = new GregorianCalendar(TimeZone.getDefault(), Locale.getDefault());
+
             // we start at the day returned by local time. Otherwise this is a mess.
             int julianStartDay = Time.getJulianDay(System.currentTimeMillis(), dayTime.gmtoff);
 
@@ -274,6 +317,11 @@ public class ForecastFragment extends Fragment {
                 // Cheating to convert this to UTC time, which is what we want anyhow
                 dateTime = dayTime.setJulianDay(julianStartDay + i);
                 day = getReadableDateString(dateTime);
+
+                // This should replace deprecated Time() eventually
+                /*long dateTime = calendar.getTimeInMillis();
+                day = getReadableDateString(dateTime);
+                calendar.add(Calendar.DATE, 1);*/
 
                 // description is in a child array called "weather", which is 1 element long.
                 JSONObject weatherObject = dayForecast.getJSONArray(OWM_WEATHER).getJSONObject(0);
