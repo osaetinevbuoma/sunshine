@@ -78,13 +78,13 @@ public class FetchWeatherTask extends AsyncTask<String, Void, String[]> {
         SharedPreferences sharedPrefs =
                 PreferenceManager.getDefaultSharedPreferences(mContext);
         String unitType = sharedPrefs.getString(
-                mContext.getString(R.string.pref_units_key),
-                mContext.getString(R.string.pref_units_metric));
+                mContext.getString(R.string.pref_temp_unit_key),
+                mContext.getString(R.string.pref_temp_unit_metric));
 
-        if (unitType.equals(mContext.getString(R.string.pref_units_imperial))) {
+        if (unitType.equals(mContext.getString(R.string.pref_temp_unit_imperial))) {
             high = (high * 1.8) + 32;
             low = (low * 1.8) + 32;
-        } else if (!unitType.equals(mContext.getString(R.string.pref_units_metric))) {
+        } else if (!unitType.equals(mContext.getString(R.string.pref_temp_unit_metric))) {
             Log.d(LOG_TAG, "Unit type not found: " + unitType);
         }
 
@@ -330,12 +330,14 @@ public class FetchWeatherTask extends AsyncTask<String, Void, String[]> {
             final String FORMAT_PARAM = "mode";
             final String UNITS_PARAM = "units";
             final String DAYS_PARAM = "cnt";
+            final String APP_ID_PARAM = "appid";
 
             Uri builtUri = Uri.parse(FORECAST_BASE_URL).buildUpon()
                     .appendQueryParameter(QUERY_PARAM, params[0])
                     .appendQueryParameter(FORMAT_PARAM, format)
                     .appendQueryParameter(UNITS_PARAM, units)
                     .appendQueryParameter(DAYS_PARAM, Integer.toString(numDays))
+                    .appendQueryParameter(APP_ID_PARAM, BuildConfig.OPEN_WEATHER_MAP_API_KEY)
                     .build();
 
             URL url = new URL(builtUri.toString());
@@ -369,7 +371,7 @@ public class FetchWeatherTask extends AsyncTask<String, Void, String[]> {
             forecastJsonStr = buffer.toString();
         } catch (IOException e) {
             Log.e(LOG_TAG, "Error ", e);
-            // If the code didn't successfully get the weather data, there's no point in attemping
+            // If the code didn't successfully get the weather data, there's no point in attempting
             // to parse it.
             return null;
         } finally {
@@ -402,7 +404,6 @@ public class FetchWeatherTask extends AsyncTask<String, Void, String[]> {
             for(String dayForecastStr : result) {
                 mForecastAdapter.add(dayForecastStr);
             }
-            // New data is back from the server.  Hooray!
         }
     }
 }

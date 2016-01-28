@@ -106,11 +106,11 @@ public class ForecastFragment extends Fragment {
         String location = mSharedPreferences.getString(getString(R.string.pref_location_key), getString(R.string.pref_location_default));
 
         // Fetch weather report from OpenWeatherMap API
-        FetchWeatherTask fetchWeatherTask = new FetchWeatherTask();
+        FetchWeatherTask fetchWeatherTask = new FetchWeatherTask(getActivity(), mForecastAdapter);
         fetchWeatherTask.execute(location);
     }
 
-    public class FetchWeatherTask extends AsyncTask<String, Void, String[]> {
+    /*public class FetchWeatherTask extends AsyncTask<String, Void, String[]> {
 
         private final String LOG_TAG = FetchWeatherTask.class.getSimpleName();
 
@@ -224,9 +224,9 @@ public class ForecastFragment extends Fragment {
             }
         }
 
-        /* The date/time conversion code is going to be moved outside the asynctask later,
+        *//* The date/time conversion code is going to be moved outside the asynctask later,
                  * so for convenience we're breaking it out into its own method now.
-                 */
+                 *//*
         private String getReadableDateString(long time){
             // Because the API returns a unix timestamp (measured in seconds),
             // it must be converted to milliseconds in order to be converted to valid date.
@@ -234,9 +234,9 @@ public class ForecastFragment extends Fragment {
             return shortenedDateFormat.format(time);
         }
 
-        /**
+        *//**
          * Prepare the weather high/lows for presentation.
-         */
+         *//*
         private String formatHighLows(double high, double low) {
             // Check user's temperature units preference
             SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
@@ -258,13 +258,13 @@ public class ForecastFragment extends Fragment {
             return highLowStr;
         }
 
-        /**
+        *//**
          * Take the String representing the complete forecast in JSON Format and
          * pull out the data we need to construct the Strings needed for the wireframes.
          *
          * Fortunately parsing is easy:  constructor takes the JSON string and converts it
          * into an Object hierarchy for us.
-         */
+         *//*
         private String[] getWeatherDataFromJson(String forecastJsonStr, int numDays)
                 throws JSONException {
 
@@ -318,9 +318,9 @@ public class ForecastFragment extends Fragment {
                 day = getReadableDateString(dateTime);
 
                 // This should replace deprecated Time() eventually
-                /*long dateTime = calendar.getTimeInMillis();
+                *//*long dateTime = calendar.getTimeInMillis();
                 day = getReadableDateString(dateTime);
-                calendar.add(Calendar.DATE, 1);*/
+                calendar.add(Calendar.DATE, 1);*//*
 
                 // description is in a child array called "weather", which is 1 element long.
                 JSONObject weatherObject = dayForecast.getJSONArray(OWM_WEATHER).getJSONObject(0);
@@ -338,5 +338,5 @@ public class ForecastFragment extends Fragment {
 
             return resultStrs;
         }
-    }
+    }*/
 }
