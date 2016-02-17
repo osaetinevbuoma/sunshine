@@ -148,18 +148,23 @@ public class TestDb extends AndroidTestCase {
         // Query the database and receive a Cursor back
         String whereClause = WeatherContract.WeatherEntry.COLUMN_LOC_KEY + " = ?";
         String[] whereArgs = new String[] { String.valueOf(locationRowId) };
-        Cursor cursor = db.query(WeatherContract.WeatherEntry.TABLE_NAME,
+        /*Cursor cursor = db.query(WeatherContract.WeatherEntry.TABLE_NAME,
                 null,
                 whereClause,
                 whereArgs,
                 null,
                 null,
+                null);*/
+        Cursor cursor = db.query(WeatherContract.WeatherEntry.TABLE_NAME,
+                null,
+                null,
+                null,
+                null,
+                null,
                 null);
 
-        Log.i(LOG_TAG, String.valueOf(locationRowId));
-
         // Move the cursor to a valid database row
-        assertFalse("Error: No records found in weather table", cursor.moveToFirst());
+        assertTrue("Error: No records found in weather table", cursor.moveToFirst());
 
         // Validate data in resulting Cursor with the original ContentValues
         // (you can use the validateCurrentRecord function in TestUtilities to validate the
