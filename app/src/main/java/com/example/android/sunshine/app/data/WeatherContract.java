@@ -62,7 +62,6 @@ public class WeatherContract {
     public static final class LocationEntry implements BaseColumns {
         public static final Uri CONTENT_URI =
                 BASE_CONTENT_URI.buildUpon().appendPath(PATH_LOCATION).build();
-
         public static final String CONTENT_TYPE =
                 ContentResolver.CURSOR_DIR_BASE_TYPE + "/" + CONTENT_AUTHORITY + "/" + PATH_LOCATION;
         public static final String CONTENT_ITEM_TYPE =
@@ -72,7 +71,7 @@ public class WeatherContract {
 
         // The location setting string is what will be sent to openweathermap
         // as location query
-        public static final String COLUMN_LOCATION_SETTING = "locatin_setting";
+        public static final String COLUMN_LOCATION_SETTING = "location_setting";
 
         public static final String COLUMN_COORD_LONG = "coord_long";
         public static final String COLUMN_COORD_LAT = "coord_lat";
@@ -108,7 +107,7 @@ public class WeatherContract {
         // Humidity is stored as a float representing percentage
         public static final String COLUMN_HUMIDITY = "humidity";
 
-        // Humidity is stored as a float representing percentage
+        // Pressure is stored as a float representing percentage
         public static final String COLUMN_PRESSURE = "pressure";
 
         // Windspeed is stored as a float representing windspeed  mph
@@ -133,7 +132,7 @@ public class WeatherContract {
             Student: Fill in this buildWeatherLocation function
          */
         public static Uri buildWeatherLocation(String locationSetting) {
-            return null;
+            return CONTENT_URI.buildUpon().appendPath(locationSetting).build();
         }
 
         public static Uri buildWeatherLocationWithStartDate(
