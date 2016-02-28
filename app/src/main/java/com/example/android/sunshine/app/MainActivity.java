@@ -27,6 +27,8 @@ import java.util.ArrayList;
 public class MainActivity extends AppCompatActivity {
 
     private static final String LOG_TAG = MainActivity.class.getCanonicalName();
+    private static String mLocation;
+    private static final String FORECASTFRAGMENT_TAG = "Forecast_Fragment_Tag";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -34,41 +36,10 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         if (savedInstanceState == null) {
             getSupportFragmentManager().beginTransaction()
-                    .add(R.id.container, new ForecastFragment())
+                    .add(R.id.container, new ForecastFragment(), FORECASTFRAGMENT_TAG)
                     .commit();
         }
-
-        Log.v(LOG_TAG, "Called onCreate()");
-    }
-
-    @Override
-    protected void onPause() {
-        super.onPause();
-        Log.i(LOG_TAG, "Called onPause()");
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-        Log.i(LOG_TAG, "Called onResume()");
-    }
-
-    @Override
-    protected void onStop() {
-        super.onStop();
-        Log.i(LOG_TAG, "Called onStop()");
-    }
-
-    @Override
-    protected void onStart() {
-        super.onStart();
-        Log.i(LOG_TAG, "Called onStart()");
-    }
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        Log.i(LOG_TAG, "Called onDestroy()");
+        mLocation = Utility.getPreferredLocation(this);
     }
 
     @Override
@@ -105,9 +76,7 @@ public class MainActivity extends AppCompatActivity {
         final String QUERY_PARAM = "q";
 
         // Read user's preferred location from preference
-        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
-        String location = sharedPreferences.getString(getResources().getString(R.string.pref_location_key),
-                getResources().getString(R.string.pref_location_default));
+        String location = Utility.getPreferredLocation(this);
         Uri geoLocation = Uri.parse(BASE_URL).buildUpon()
                 .appendQueryParameter(QUERY_PARAM, Uri.encode(location))
                 .build();
@@ -118,6 +87,17 @@ public class MainActivity extends AppCompatActivity {
             startActivity(intent);
         } else {
             Log.d(LOG_TAG, "No app available to start Map implicit intent");
+        }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if (!mLocation.equals(Utility.getPreferredLocation(this))) {
+            ForecastFragment forecastFragment = (ForecastFragment) getSupportFragmentManager()
+                    .findFragmentByTag(FORECASTFRAGMENT_TAG);
+            forecastFragment.onLocationChanged();
+            mLocation = Utility.getPreferredLocation(this);
         }
     }
 }
